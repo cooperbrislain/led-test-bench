@@ -16,6 +16,7 @@ int count;
 int color;
 int brightness;
 int speed;
+int num_leds;
 
 void fade(){
     for(int i=0; i<NUM_LEDS; i++){ 
@@ -65,22 +66,31 @@ void chase_white() {
 }
 
 void count_leds() {
-    color = 40;
+    color = 80;
     for (int i=0; i<500; i++) {
-        leds[i] = CHSV(color,255,255);
-        if(i%5==0) {
-            leds[i] = CHSV((color+128)%255,255,255);
-            delay(1000);
+        if(i%50==49) {
+            leds[i] = CHSV((color+128)%255,255,128);
         }
-        delay(512);
+        else if(i%10==9) {
+            leds[i] = CHSV((color+96)%255,255,128);
+        }
+        else if(i%5==4) {
+            leds[i] = CHSV((color+64)%255,255,64);
+        } else {
+            leds[i] = CHSV(color,255,40);
+        }
+        FastLED.show();
+        delay(50*((i%50==49)+(i%10==9)+(i%5==4)+1)*2);
     }
+    delay(5000);
 }
 
 void loop() {
+    count_leds();
     if(count%100) {
         color=(color+1)%255;
     }
-    chase_white();
+    //chase_white();
     fadeby(1);
     FastLED.show();
     count++;
