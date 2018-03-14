@@ -48,7 +48,7 @@ void setup() {
     randomSeed(analogRead(A0)); 
     index = 0;
     index2 = 0;
-    speed = 25;
+    speed = 0;
 }
 
 void all_on() {
@@ -65,8 +65,17 @@ void chase_white() {
     }
 }
 
-void count_leds() {
+void countfade() {
+    for (int i=0;i<count;i++) {
+        if(i%10!=9) {
+            leds[i].fadeToBlackBy(10);
+        }
+    }
+}
+
+int count_leds() {
     color = 80;
+    count = 0;
     for (int i=0; i<500; i++) {
         if(i%50==49) {
             leds[i] = CHSV((color+128)%255,255,128);
@@ -79,14 +88,18 @@ void count_leds() {
         } else {
             leds[i] = CHSV(color,255,40);
         }
+        countfade();
         FastLED.show();
+        count++;
         delay(50*((i%50==49)+(i%10==9)+(i%5==4)+1)*2);
     }
+    return count;
     delay(5000);
+
 }
 
 void loop() {
-    count_leds();
+    num_leds = count_leds();
     if(count%100) {
         color=(color+1)%255;
     }
