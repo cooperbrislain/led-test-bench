@@ -1,8 +1,11 @@
 #include "FastLED.h"
 
-#define NUM_LEDS 120
+#define NUM_LEDS 74
 #define DATA_PIN 7
 #define CLOCK_PIN 6
+#define SPEED_PIN A0
+#define BUTTON_PIN 4
+#define PI 3.1415
 //#define BRIGHTNESS_PIN 0
 //#define SPEED_PIN 1
 #define MIN_BRIGHTNESS 32
@@ -45,7 +48,8 @@ void setup() {
     }
     FastLED.show();
     count=0;
-    randomSeed(analogRead(A0)); 
+    num_leds = NUM_LEDS;
+    randomSeed(analogRead(A3)); 
     index = 0;
     index2 = 0;
     speed = 0;
@@ -76,7 +80,11 @@ void countfade() {
 int count_leds() {
     color = 80;
     count = 0;
-    for (int i=0; i<500; i++) {
+    for (int i=index; i<500; i++) {
+        if(digitalRead(BUTTON_PIN) == HIGH) {
+            num_leds = i-(i%10);
+            return;
+        }
         if(i%50==49) {
             leds[i] = CHSV((color+128)%255,255,128);
         }
@@ -95,15 +103,23 @@ int count_leds() {
     }
     return count;
     delay(5000);
+}
 
+void sinewave(){
+    for(int i=0;i<1000;i++){
+        fade();
+        leds[(num_leds+(int)(sin(i*PI/180)*num_leds/2+num_leds/2))%num_leds] = CRGB::White;
+        FastLED.show();
+        delay(10);
+    }
 }
 
 void loop() {
+    sinewave();
     num_leds = count_leds();
     if(count%100) {
         color=(color+1)%255;
     }
-    //chase_white();
     fadeby(1);
     FastLED.show();
     count++;
