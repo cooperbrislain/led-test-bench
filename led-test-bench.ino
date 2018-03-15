@@ -81,6 +81,7 @@ int count_leds() {
     color = 80;
     count = 0;
     for (int i=index; i<500; i++) {
+        countfade();
         if(digitalRead(BUTTON_PIN) == HIGH) {
             num_leds = i-(i%10);
             return;
@@ -96,7 +97,7 @@ int count_leds() {
         } else {
             leds[i] = CHSV(color,255,40);
         }
-        countfade();
+        color+=3;
         FastLED.show();
         count++;
         delay(50*((i%50==49)+(i%10==9)+(i%5==4)+1)*2);
