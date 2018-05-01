@@ -1,6 +1,9 @@
 #include "FastLED.h"
 
-#define NUM_LEDS 74
+#define IS_WS2812 0
+#define IS_APA102 1
+
+#define NUM_LEDS 180
 #define DATA_PIN 7
 #define CLOCK_PIN 6
 #define SPEED_PIN A0
@@ -22,13 +25,21 @@ int speed;
 int num_leds;
 
 void fade(){
-    for(int i=0; i<NUM_LEDS; i++){ 
+    for(int i=0; i<NUM_LEDS; i++){
          leds[i].fadeToBlackBy( 10 );
     }
 }
 
+void countfade() {
+    for (int i=0;i<count;i++) {
+        if(i%10!=9) {
+            leds[i].fadeToBlackBy(10);
+        }
+    }
+}
+
 void fadeby(int b){
-    for(int i=0; i<NUM_LEDS; i++){ 
+    for(int i=0; i<NUM_LEDS; i++){
          leds[i].fadeToBlackBy( b );
     }
 }
@@ -42,37 +53,28 @@ void fade_out_by(int b){
 
 void setup() {
     //Serial.begin(9600);
-    FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
+    if(IS_APA102) {
+        FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
+    }
+    if(IS_WS2812) {
+        FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
+    }
     for (int i=0; i<NUM_LEDS; i++) {
-        leds[i] = CRGB::Black;  
+        leds[i] = CRGB::Black;
     }
     FastLED.show();
     count=0;
     num_leds = NUM_LEDS;
-    randomSeed(analogRead(A3)); 
+    //randomSeed(analogRead(A3));
     index = 0;
     index2 = 0;
     speed = 0;
-}
-
-void all_on() {
-    for(int i=0; i<NUM_LEDS;i++) {
-        leds[i] = CRGB::Blue;
-    }
 }
 
 void chase_white() {
     for(int i=0; i<NUM_LEDS;i++){
         if((i+count)%10==0) {
             leds[i] += CHSV(color+(((count+count/25)/10)%2*128)%255, 255, 85);
-        }
-    }
-}
-
-void countfade() {
-    for (int i=0;i<count;i++) {
-        if(i%10!=9) {
-            leds[i].fadeToBlackBy(10);
         }
     }
 }
@@ -84,7 +86,7 @@ int count_leds() {
         countfade();
         if(digitalRead(BUTTON_PIN) == HIGH) {
             num_leds = i-(i%10);
-            return;
+            break;
         }
         if(i%50==49) {
             leds[i] = CHSV((color+128)%255,255,128);
