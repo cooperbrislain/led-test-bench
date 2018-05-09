@@ -56,7 +56,7 @@ void fade_out_by(int b){
 void setup() {
     //Serial.begin(9600);
     if(IS_APA102) {
-        FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
+        FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
     }
     if(IS_WS2812) {
         FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -152,12 +152,14 @@ void fill(CRGB color) {
 }
 
 void light_tests(int num_leds) {
-    for(int i=0; i<TEST_LEDS; i++) {
-        leds[i] = CRGB::Blue;
+    for(int i=0; i<TEST_LEDS-1; i++) {
+        leds[i] = CRGB::Red;
         leds[TEST_LEDS+num_leds+TEST_LEDS-(i+1)] = CRGB::Blue;
         FastLED.show();
         delay(1000);
     }
+    fill(CRGB::Green);
+    FastLED.show();
 }
 
 void test_strip(int num_leds) {
@@ -165,8 +167,8 @@ void test_strip(int num_leds) {
     // num_leds is the number of LEDs in the strip to be tested
     for (int i=0; i<num_leds; i++) {
         CRGB color = CRGB::White;
-        if (i%10 == 0) color = CRGB::Blue;
-        if (i%100 == 0) color = CRGB::Red;
+        if ((i+1)%10 == 0) color = CRGB::Blue;
+        if ((i+1)%100 == 0) color = CRGB::Red;
         leds[TEST_LEDS+i] = color;
         leds[TEST_LEDS+num_leds-(i+1)] = color;
         FastLED.show();
@@ -184,8 +186,6 @@ void test_strip(int num_leds) {
 }
 
 void initialize(int num_leds) {
-    fill(CRGB::White);
-    FastLED.show();
     fill(CRGB::Black);
     FastLED.show();
     count = 0;
