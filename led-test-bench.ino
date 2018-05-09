@@ -173,7 +173,9 @@ void test_strip(int num_leds) {
         fadeby(25);
         delay(3);
     }
-    while (leds[TEST_LEDS] != CRGB::Black) {
+    // as long as the first LED is still lit, keep fading out
+    // (others shoudl not be lit by the time this one fades out)
+    while (leds[TEST_LEDS]) {
         FastLED.show();
         fadeby(25);
         delay(3);
