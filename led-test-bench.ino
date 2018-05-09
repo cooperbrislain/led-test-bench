@@ -177,11 +177,11 @@ void test_strip(int num_leds) {
     }
     // as long as the first LED is still lit, keep fading out
     // (others shoudl not be lit by the time this one fades out)
-    while (leds[TEST_LEDS]) {
-        FastLED.show();
+    do {
         fadeby(25);
+        FastLED.show();
         delay(3);
-    }
+    } while (leds[TEST_LEDS]);
     delay(FRAME_DELAY);
 }
 
