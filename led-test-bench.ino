@@ -163,16 +163,22 @@ void light_tests(int num_leds) {
 void test_strip(int num_leds) {
     // assumes 5 LED test strip before, and after
     // num_leds is the number of LEDs in the strip to be tested
-    for(int i=0;i<num_leds;i++) {
+    for (int i=0; i<num_leds; i++) {
         CRGB color = CRGB::White;
-        if(i%10 == 0) color = CRGB::Blue;
-        if(i%100 == 0) color = CRGB::Red;
+        if (i%10 == 0) color = CRGB::Blue;
+        if (i%100 == 0) color = CRGB::Red;
         leds[TEST_LEDS+i] = color;
         leds[TEST_LEDS+num_leds-(i+1)] = color;
         FastLED.show();
         fadeby(25);
         delay(3);
     }
+    while (leds[TEST_LEDS] != CRGB::Black) {
+        FastLED.show();
+        fadeby(25);
+        delay(3);
+    }
+    delay(FRAME_DELAY);
 }
 
 void initialize(int num_leds) {
