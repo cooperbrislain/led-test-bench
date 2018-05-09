@@ -6,11 +6,10 @@
 
 #define NUM_LEDS 200 // maximum ever; we won't use them all
 #define TEST_LEDS 5
-#define DATA_PIN 7
-#define CLOCK_PIN 6
+#define DATA_PIN 30
+#define CLOCK_PIN 31
 #define SPEED_PIN A0
 #define FRAME_DELAY 100
-#define BUTTON_PIN 4
 #define NUM_SPECS 3
 #define PI 3.1415
 //#define BRIGHTNESS_PIN 0
@@ -37,10 +36,8 @@ int count;
 int color;
 int brightness;
 int speed;
+bool btn_still_down;
 int specs[NUM_SPECS];
-specs[0] = 52;
-specs[1] = 73;
-specs[2] = 143;
 
 int num_leds;
 
@@ -87,7 +84,11 @@ void fade_out_by(int b){
 void setup() {
     lcd.begin(16, 2);              // start the library
     lcd.setCursor(0,0);
-    lcd.print("Velleman VMA203"); // print a simple message
+    lcd.print("LED Test Bench"); // print a simple message
+    specs[0] = 52;
+    specs[1] = 73;
+    specs[2] = 143;
+
     //Serial.begin(9600);
     if(IS_APA102) {
         FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
@@ -112,35 +113,6 @@ void chase_white() {
             leds[i] += CHSV(color+(((count+count/25)/10)%2*128)%255, 255, 85);
         }
     }
-}
-
-int count_leds() {
-    color = 80;
-    count = 0;
-    for (int i=index; i<500; i++) {
-        countfade();
-        if(digitalRead(BUTTON_PIN) == HIGH) {
-            num_leds = i-(i%10);
-            break;
-        }
-        if(i%50==49) {
-            leds[i] = CHSV((color+128)%255,255,128);
-        }
-        else if(i%10==9) {
-            leds[i] = CHSV((color+96)%255,255,128);
-        }
-        else if(i%5==4) {
-            leds[i] = CHSV((color+64)%255,255,64);
-        } else {
-            leds[i] = CHSV(color,255,40);
-        }
-        color+=3;
-        FastLED.show();
-        count++;
-        delay(50*((i%50==49)+(i%10==9)+(i%5==4)+1)*2);
-    }
-    return count;
-    delay(5000);
 }
 
 void sinewave(){
@@ -190,6 +162,7 @@ void light_tests() {
         leds[TEST_LEDS+num_leds+TEST_LEDS-(i+1)] = CRGB::Blue;
         FastLED.show();
         delay(1000);
+        check_buttons();
     }
     fill(CRGB::Green);
     FastLED.show();
@@ -207,6 +180,7 @@ void test_strip() {
         FastLED.show();
         fadeby(25);
         delay(3);
+        check_buttons();
     }
     // as long as the first LED is still lit, keep fading out
     // (others shoudl not be lit by the time this one fades out)
@@ -214,6 +188,7 @@ void test_strip() {
         fadeby(25);
         FastLED.show();
         delay(3);
+        check_buttons();
     } while (leds[TEST_LEDS]);
     delay(FRAME_DELAY);
 }
@@ -222,26 +197,47 @@ void initialize() {
     fill(CRGB::Black);
     FastLED.show();
     count = 0;
-    light_tests(num_leds);
+    light_tests();
+}
+
+void print_status() {
+    char buffer[16];
+    lcd.setCursor(0,0);
+    lcd.print("LED Test Bench");
+    lcd.setCursor(0,1);
+    sprintf(buffer, "Spec %d - %d px", spec_index, num_leds);
+    lcd.print(buffer);
+}
+
+void check_buttons() {
+    int btn = read_lcd_buttons();
+    if(btn == btnNONE) {
+        btn_still_down = false;
+    } else {
+        if (!btn_still_down) {
+            btn_still_down = true;
+            switch( btn ) {
+                case btnUP :
+                    if(spec_index > 0) {
+                        spec_index--;
+                        num_leds = specs[spec_index];
+                    }
+                    break;
+                case btnDOWN :
+                    spec_index = (spec_index + 1)%NUM_SPECS;
+                    num_leds = specs[spec_index];
+                    break;
+            }
+            print_status();
+        }
+    }
 }
 
 void loop() {
-    initialize(num_leds);
-    test_strip(num_leds);
-    if (int btn = read_lcd_buttons() != btnNONE) {
-        switch( btn ) {
-            case btnUP :
-                if(spec_index > 0) {
-                    spec_index--;
-                    num_leds = specs[spec_index];
-                }
-                break;
-            case btnDOWN :
-                spec_index = (spec_index + 1)%NUM_SPECS;
-                num_leds = specs[spec_index];
-                break;
-        }
-    }
+    print_status();
+    initialize();
+    test_strip();
+    check_buttons();
     delay(FRAME_DELAY);
     count++;
 }
