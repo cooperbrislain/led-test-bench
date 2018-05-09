@@ -3,10 +3,12 @@
 #define IS_WS2812 0
 #define IS_APA102 1
 
-#define NUM_LEDS 180
+#define NUM_LEDS 153 // 5+153+5
+#define TEST_LEDS 5
 #define DATA_PIN 7
 #define CLOCK_PIN 6
 #define SPEED_PIN A0
+#define FRAME_DELAY 100
 #define BUTTON_PIN 4
 #define PI 3.1415
 //#define BRIGHTNESS_PIN 0
@@ -117,14 +119,75 @@ void sinewave(){
     }
 }
 
-void loop() {
-    sinewave();
-    num_leds = count_leds();
-    if(count%100) {
-        color=(color+1)%255;
+void randstrobe() {
+    for(int i=0; i<10000; i++) {
+        if(i%8==0) {
+            for(int j=random(NUM_LEDS); j<random(NUM_LEDS)+random(NUM_LEDS/3); j++) {
+                leds[j%NUM_LEDS] += CHSV(255,0,180);
+            }
+        }
+        FastLED.show();
+        fadeby(50);
+        count++;
     }
-    fadeby(1);
+}
+
+void strobe() {
+    for(int i=0; i<10000; i++) {
+        if(i%4==0) {
+            int which = random(4);
+            for(i=which*143; i<which*143+143; i++) {
+                leds[i]+= CHSV(0,0,188);
+            }
+        }
+        FastLED.show();
+        count++;
+    }
+}
+
+void fill(CRGB color) {
+    for(int i=0; i<NUM_LEDS; i++) {
+        leds[i] = color;
+    }
+}
+
+void light_tests(int num_leds) {
+    for(int i=0; i<TEST_LEDS; i++) {
+        leds[i] = CRGB::Blue;
+        leds[TEST_LEDS+num_leds+TEST_LEDS-(i+1)] = CRGB::Blue;
+        FastLED.show();
+        delay(1000);
+    }
+}
+
+void test_strip(int num_leds) {
+    // assumes 5 LED test strip before, and after
+    // num_leds is the number of LEDs in the strip to be tested
+    for(int i=0;i<num_leds;i++) {
+        CRGB color = CRGB::White;
+        if(i%10 == 0) color = CRGB::Blue;
+        if(i%100 == 0) color = CRGB::Red;
+        leds[TEST_LEDS+i] = color;
+        leds[TEST_LEDS+num_leds-(i+1)] = color;
+        FastLED.show();
+        fadeby(25);
+        delay(3);
+    }
+}
+
+void initialize(int num_leds) {
+    fill(CRGB::White);
     FastLED.show();
+    fill(CRGB::Black);
+    FastLED.show();
+    count = 0;
+    light_tests(num_leds);
+}
+
+void loop() {
+    int num_leds = 143;
+    initialize(num_leds);
+    test_strip(num_leds);
+    delay(FRAME_DELAY);
     count++;
-    delay(speed);
 }
