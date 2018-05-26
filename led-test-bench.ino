@@ -120,7 +120,7 @@ void setup() {
 
 void chase_white() {
     for(int i=0; i<NUM_LEDS;i++){
-        if((i+count)%10==0) {
+        if((int i+count)%10==0) {
             leds[i] += CHSV(color+(((count+count/25)/10)%2*128)%255, 255, 85);
         }
     }
