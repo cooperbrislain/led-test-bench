@@ -1,17 +1,26 @@
+#define MQTT_DEBUG
+#include "SPI.h"
+#include <Ethernet.h>
+#include <Dns.h>
+#include <Dhcp.h>
+#include <PubSubClient.h>
 #include "FastLED.h"
 #include <LiquidCrystal.h>
 
 #define IS_WS2812 0
 #define IS_APA102 1
 
-#define NUM_LEDS 200 // maximum ever; we won't use them all
-#define TEST_LEDS 5
+#define PRE_LEDS 0
+#define POST_LEDS 1
+#define NUM_LEDS 200
 #define DATA_PIN 30
 #define CLOCK_PIN 31
-#define SPEED_PIN A0
 #define FRAME_DELAY 100
-#define NUM_SPECS 3
+#define BUTTON_PIN 4
 #define PI 3.1415
+#define BIG_BTN_COM 40
+#define BIG_BTN_NO 41
+#define BIG_BTN_LED 42
 //#define BRIGHTNESS_PIN 0
 //#define SPEED_PIN 1
 #define MIN_BRIGHTNESS 32
@@ -22,6 +31,9 @@
 #define btnLEFT   3
 #define btnSELECT 4
 #define btnNONE   5
+
+int clock_ticking;
+int num_leds;
 
 int lcd_key     = 0;
 int adc_key_in  = 0;
@@ -234,10 +246,24 @@ void check_buttons() {
     }
 }
 
+void check_big_button() {
+    int val = digitalRead(BIG_BTN_NO);
+    if (val) {
+        if (clock_ticking) {
+            clock_ticking = 0;
+            digitalWrite(BIG_BTN_LED, LOW);
+        } else {
+            clock_ticking = 1;
+            digitalWrite(BIG_BTN_LED, HIGH);
+        }
+    }
+}
+
 void loop() {
     print_status();
     initialize();
     test_strip();
+    check_big_button();
     check_buttons();
     delay(FRAME_DELAY);
     count++;
