@@ -180,18 +180,21 @@ void fill(CRGB color) {
 }
 
 void test_strip() {
-    for (int i=0; i<NUM_LEDS; i++) {
-        leds[i] = CRGB::Black;
-    }
-    leds[0] = CRGB::Red;
-    leds[num_leds-1] = CRGB::Red;
-    leds[num_leds] = CRGB::Blue;
-    for (int i=1; i<num_leds-1; i++) {
-        leds[i] = CRGB::Indigo;
+    for(int i=0;i<NUM_LEDS;i++) {
+        if (i < 42) {
+            leds[i] = CRGB::DarkSlateGray;
+        } else if (i < 74) {
+            leds[i] = CRGB::DodgerBlue;
+        } else if (i < 113) {
+            leds[i] = CRGB::DarkSlateGray;
+        } else if (i < 143) {
+            leds[i] = CRGB::DodgerBlue;
+        } else {
+            leds[i] = CRGB::DarkSlateGray;
+        }
     }
     FastLED.show();
-
-    delay(1000);
+    delay(3000);
 }
 
 void initialize() {
@@ -200,73 +203,8 @@ void initialize() {
     count = 0;
 }
 
-/*void print_status() {
-    char buffer[16];
-    sprintf(buffer, "Spec %d - %d px", spec_index, num_leds);
-}*/
-
-void check_big_button() {
-    int val = digitalRead(BIG_BTN_NO);
-    if (val) {
-        if (clock_ticking) {
-            clock_ticking = 0;
-            digitalWrite(BIG_BTN_LED, LOW);
-        } else {
-            clock_ticking = 1;
-            digitalWrite(BIG_BTN_LED, HIGH);
-        }
-    }
-}
-
-void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    payload[length] = '\0';
-    if(strcmp(topic,"leds/test/checkin") == 0) {
-        Serial.println("Message received from leds/test/checkin");
-        int new_spec = atoi((char *)payload);
-        num_leds = specs[new_spec];
-        Serial.print("Chaned to spec ");
-        Serial.print(new_spec);
-        Serial.print('(');
-        Serial.print(num_leds);
-        Serial.print(')');
-    }
-}
-
-void reconnect() {
-  // Loop until we're reconnected
-    while (!mqtt_client.connected()) {
-        Serial.print("Attempting MQTT connection...");
-        // Attempt to connect
-        if (mqtt_client.connect("arduinoClient",mqtt_username,mqtt_key)) {
-            Serial.println("connected");
-            // ... and resubscribe
-            if(!mqtt_client.subscribe("leds/test/checkin")) {
-                Serial.println("Subscribe to leds/test/checkin failed.");
-            } else {
-                Serial.println("Subscribed to leds/test/checkin.");
-            }
-        } else {
-            Serial.print("failed, rc=");
-            Serial.print(mqtt_client.state());
-            Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
-            delay(5000);
-        }
-    }
-}
-
 void loop() {
-    if (!mqtt_client.connected()) {
-        Serial.println("Reconnecting...");
-        reconnect();
-    }
-    mqtt_client.loop();
-    //print_status();
     test_strip();
-    check_big_button();
     delay(FRAME_DELAY);
     count++;
 }
