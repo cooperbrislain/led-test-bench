@@ -104,9 +104,9 @@ void failed() {
 
 void finish() {
     for (int i=0; i<NUM_LEDS; i++) {
-        leds[i] = CRGB::Green;
+        leds[i] = CHSV(i, 255, 25);
         FastLED.show();
-        delay(25);
+        delay(5);
     }
 }
 
