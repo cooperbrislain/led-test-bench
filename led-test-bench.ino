@@ -12,7 +12,7 @@
 
 #define PRE_LEDS 0
 #define POST_LEDS 1
-#define NUM_LEDS 200
+#define NUM_LEDS 500
 #define DATA_PIN 30
 #define CLOCK_PIN 31
 #define FRAME_DELAY 100
