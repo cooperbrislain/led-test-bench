@@ -1,11 +1,5 @@
-#define MQTT_DEBUG
 #include "SPI.h"
-#include <Ethernet.h>
-#include <Dns.h>
-#include <Dhcp.h>
-#include <PubSubClient.h>
 #include "FastLED.h"
-#include <ArduinoJson.h>
 
 #define IS_WS2812 0
 #define IS_APA102 1
@@ -35,10 +29,8 @@
 
 #define halt(s) { Serial.println(F( s )); while(1);  }
 
-void mqtt_callback(char* topic, byte* payload, unsigned int length);
 void reconnect();
 
-int clock_ticking;
 int num_leds;
 
 CRGB leds[NUM_LEDS];
@@ -50,17 +42,6 @@ int color;
 int brightness;
 bool btn_still_down;
 int specs[NUM_SPECS];
-
-// Ethernet Vars
-byte mac[] = { 0xCA, 0x3D, 0xB3, 0x33, 0xFC, 0x1D };
-
-const char* mqtt_server = "mqtt.spaceboycoop.com";
-const int mqtt_port = 1883;
-const char* mqtt_username = "spaceboycoop";
-const char* mqtt_key = "r7rObnC6i2paWPxeEMuWiF";
-
-EthernetClient eth_client;
-PubSubClient mqtt_client(eth_client);
 
 void fade(){
     for(int i=0; i<NUM_LEDS; i++){
@@ -106,7 +87,7 @@ void finish() {
     for (int i=0; i<NUM_LEDS; i++) {
         leds[i] = CHSV(i, 255, 25);
         FastLED.show();
-        delay(5);
+        delay(0);
     }
 }
 
@@ -123,8 +104,6 @@ void setup() {
     spec_index = 0;
     num_leds = specs[spec_index];
 
-    StaticJsonBuffer<200> jsonBuffer;
-
     Serial.println("Starting LED Test Bench");
     if(IS_APA102) {
         FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(12)>(leds, NUM_LEDS);
@@ -138,28 +117,6 @@ void setup() {
     leds[0] = CRGB::Green;
     FastLED.show();
     progress();
-    Serial.println("Initializing Interfaces");
-    digitalWrite(BIG_BTN_COM, HIGH);
-    digitalWrite(BIG_BTN_LED, LOW);
-    progress();
-    mqtt_client.setServer(mqtt_server, mqtt_port);
-    mqtt_client.setCallback(mqtt_callback);
-    progress();
-    Ethernet.begin(mac);
-
-    Serial.println(F("Connecting..."));
-    progress();
-    if(!Ethernet.begin(mac)) {
-        Serial.println(F("Ethernet configuration failed."));
-        failed();
-    } else {
-        progress();
-        Serial.println(F("Ethernet configured via DHCP"));
-        Serial.print("IP address: ");
-        Serial.println(Ethernet.localIP());
-        Serial.println();
-        progress();
-    }
     finish();
     delay(1500);
     initialize();
@@ -184,11 +141,11 @@ void test_strip() {
         if (i < 42) {
             leds[i] = CRGB::DarkSlateGray;
         } else if (i < 74) {
-            leds[i] = CRGB::DodgerBlue;
+            leds[i] = CRGB::Tomato;
         } else if (i < 113) {
             leds[i] = CRGB::DarkSlateGray;
         } else if (i < 143) {
-            leds[i] = CRGB::DodgerBlue;
+            leds[i] = CRGB::Tomato;
         } else {
             leds[i] = CRGB::DarkSlateGray;
         }
