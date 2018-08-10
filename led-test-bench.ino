@@ -2,12 +2,12 @@
 
 #define DEBUG 0
 
-#define IS_WS2812 0
-#define IS_APA102 1
+#define IS_WS2812 1
+#define IS_APA102 0
 
 #define PRE_LEDS 0
-#define POST_LEDS 1
-#define NUM_LEDS 300
+#define POST_LEDS 0
+#define NUM_LEDS 10
 #define CLOCK_PIN 6
 #define DATA_PIN 7
 #define FRAME_DELAY 100
@@ -36,7 +36,7 @@ unsigned int specs[NUM_SPECS];
 
 void fade(){
     for(int i=0; i<NUM_LEDS; i++){
-         leds[i].fadeToBlackBy( 10 );
+         leds[i].fadeToBlackBy(10);
     }
 }
 
@@ -96,6 +96,17 @@ void test_strip() {
     delay(40);
 }
 
+void randpulse() {
+    fade();
+    if (count%10 == 0) {
+        index = random(NUM_LEDS);
+        hue = random(255);
+    }
+    CRGB color = CHSV(hue, 255, 100);
+    leds[index%NUM_LEDS] += color;
+    index++;
+}
+
 void initialize() {
     for (int i=0; i<NUM_LEDS; i++) {
         leds[i] = CRGB::Black;
@@ -117,10 +128,10 @@ void blink_end() {
 }
 
 void loop() {
-    chase_specs(CRGB::Blue);
+    randpulse();
     FastLED.show();
     count++;
-    //delay(FRAME_DELAY);
+    delay(FRAME_DELAY);
 }
 
 
